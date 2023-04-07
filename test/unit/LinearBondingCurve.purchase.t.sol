@@ -4,8 +4,8 @@ pragma solidity =0.8.19;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IBondingCurve} from "@main/bondingcurves/IBondingCurve.sol";
 
-import {LinearCurve} from "@main/pricings/LinearCurve.sol";
 import {BondingCurve} from "@main/bondingcurves/BondingCurve.sol";
+import {LinearCurve} from "@main/pricings/LinearCurve.sol";
 import {LinearBondingCurve} from "@main/examples/LinearBondingCurve.sol";
 
 import {MockERC20} from  "@solmate/test/utils/mocks/MockERC20.sol";
