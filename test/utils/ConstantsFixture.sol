@@ -2,8 +2,8 @@
 pragma solidity =0.8.19;
 
 import {Test} from "@forge-std/Test.sol";
-contract ConstantsFixture is Test {
 
+contract ConstantsFixture is Test {
     uint256 public staticTime;
 
     address public deployer;
@@ -13,7 +13,6 @@ contract ConstantsFixture is Test {
     address public dave = address(14);
 
     function setUp() public virtual {
-
         staticTime = block.timestamp;
         deployer = msg.sender;
         vm.label(deployer, "Deployer");
@@ -23,7 +22,5 @@ contract ConstantsFixture is Test {
 
         deal(alice, 1 ether);
         deal(bob, 1 ether);
-
     }
-
 }

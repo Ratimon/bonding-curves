@@ -7,7 +7,6 @@ import {IBondingCurve} from "@main/bondingcurves/IBondingCurve.sol";
 import {LinearBondingCurve} from "@main/examples/LinearBondingCurve.sol";
 
 contract DeploymentLinearBondingCurve {
-
     struct Constructors_linearBondingCurve {
         IERC20 acceptedToken;
         IERC20 token;
@@ -24,21 +23,20 @@ contract DeploymentLinearBondingCurve {
         function(address, address, uint256 ) internal dealFunc,
         IERC20 saleToken_,
         address deployer
-    ) internal returns(address linearBondingCurve) {
-
-        linearBondingCurve = address(new LinearBondingCurve(
+    ) internal returns (address linearBondingCurve) {
+        linearBondingCurve = address(
+            new LinearBondingCurve(
             arg_linearBondingCurve_.acceptedToken,
             arg_linearBondingCurve_.token, 
             arg_linearBondingCurve_._duration,
             arg_linearBondingCurve_._cap,
             arg_linearBondingCurve_._slope,
             arg_linearBondingCurve_._initialPrice
-        ));
+            )
+        );
 
-        saleToken_.approve(linearBondingCurve,type(uint256).max);
-        dealFunc( address(saleToken_), deployer,arg_linearBondingCurve_._cap);
+        saleToken_.approve(linearBondingCurve, type(uint256).max);
+        dealFunc(address(saleToken_), deployer, arg_linearBondingCurve_._cap);
         IBondingCurve(linearBondingCurve).init();
     }
-
-
 }
