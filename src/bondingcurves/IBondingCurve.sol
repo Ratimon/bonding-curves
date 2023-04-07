@@ -29,7 +29,7 @@ interface IBondingCurve {
 
     // ----------- Getters -----------
 
-    function getCurrentPrice() external view returns (UD60x18);
+    function getCurrentPrice(UD60x18 tokenSupply) external view returns (UD60x18);
 
     function calculatePurchaseAmountOut(UD60x18 tokenAmountIn) external view returns (UD60x18 balanceAmountOut);
 

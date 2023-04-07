@@ -117,6 +117,10 @@ contract TestUnitLinearBondingCurve is ConstantsFixture, DeploymentLinearBonding
 
         uint256 purchase_amount = 7e18;
 
+        // 1.5*0 + 30 = 30
+        assertEq(unwrap(linearBondingCurve.getCurrentPrice(ud(0))), 30e18 );
+        assertEq(unwrap(linearBondingCurve.getCurrentPrice(linearBondingCurve.reserveBalance())), 30e18 );
+
         vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true, emitter: address(linearBondingCurve) }  );
         emit Purchase(alice, ud(purchase_amount), ud(246.75 ether));
         UD60x18 amountOut = linearBondingCurve.purchase( alice, purchase_amount);
@@ -132,6 +136,10 @@ contract TestUnitLinearBondingCurve is ConstantsFixture, DeploymentLinearBonding
         UD60x18 firstIntegral = linearCurve.getPoolBalance(postSaleTokenSupply);
         UD60x18 secondIntegral = linearCurve.getPoolBalance(preTotalPurchased);
         UD60x18 changeInSaleToken = firstIntegral.sub(secondIntegral);
+
+        // 1.5*7 + 30 = 40.5
+        assertEq(unwrap(linearBondingCurve.getCurrentPrice(ud(purchase_amount))), 40.5e18 );
+        assertEq(unwrap(linearBondingCurve.getCurrentPrice(linearBondingCurve.reserveBalance())), 40.5e18 );
 
         assertEq(alicePostBalSaleToken, 246.75e18 );
         assertEq(alicePostBalSaleToken - alicePreBalSaleToken, unwrap(changeInSaleToken) );

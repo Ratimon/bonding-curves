@@ -133,11 +133,12 @@ abstract contract BondingCurve is IBondingCurve, Initializable, Pausable, Ownabl
 
     /**
      * @notice return current instantaneous bonding curve price
+     * @param tokenSupply the current amount of acceptable token purchased
      * @return amountOut price reported
      * @dev just use only one helper function from LinearCurve
      *
      */
-    function getCurrentPrice() external view virtual returns (UD60x18);
+    function getCurrentPrice(UD60x18 tokenSupply) external view virtual returns (UD60x18);
 
     /**
      * @notice return amount of token sale received after a bonding curve purchase
