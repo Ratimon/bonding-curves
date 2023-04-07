@@ -18,6 +18,8 @@ import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 contract TestUnitBondingCurveAsOwner is ConstantsFixture, DeploymentLinearBondingCurve {
 
+    event Paused(address account);
+    event Unpaused(address account);
     event CapUpdate(UD60x18 oldAmount, UD60x18 newAmount);
     event Allocate(address indexed caller, UD60x18 amount);
 
@@ -46,7 +48,6 @@ contract TestUnitBondingCurveAsOwner is ConstantsFixture, DeploymentLinearBondin
         arg_linearBondingCurve._cap = 20_000e18;
         arg_linearBondingCurve._slope = 1.5e18;
         arg_linearBondingCurve._initialPrice = 30e18;
-
 
         vm.stopPrank();
     }
@@ -83,11 +84,39 @@ contract TestUnitBondingCurveAsOwner is ConstantsFixture, DeploymentLinearBondin
         _;
     }
 
-
-
-    function test_allocate() external deployerInit() buyerPurchasesThen() {
-
+     modifier asOwner() {
         vm.startPrank(deployer);
+        _;
+        vm.stopPrank(  );
+    }
+
+
+    function test_pause() external deployerInit() asOwner() {
+        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true, emitter: address(linearBondingCurve) }  );
+        emit Paused(deployer);
+        linearBondingCurve.pause();
+
+        vm.expectRevert();
+        linearBondingCurve.purchase( alice, 1 ether);
+
+    }
+
+    function test_unpause() external deployerInit() asOwner() {
+
+        linearBondingCurve.pause();
+
+        vm.expectEmit({checkTopic1: true, checkTopic2: false, checkTopic3: false, checkData: true, emitter: address(linearBondingCurve) }  );
+        emit Unpaused(deployer);
+        linearBondingCurve.unpause();
+
+        deal({token : address(acceptedToken), to: deployer, give: 20e18 });
+        IERC20(address(acceptedToken)).approve(address(linearBondingCurve), type(uint256).max);
+        linearBondingCurve.purchase( alice, 1 ether);
+
+
+    }
+
+    function test_allocate() external deployerInit() buyerPurchasesThen() asOwner() {
         vm.warp({newTimestamp: staticTime + 3 weeks } );
 
         uint256 deployerPreBalAcceptedToken = IERC20(address(acceptedToken)).balanceOf(deployer);
@@ -102,8 +131,6 @@ contract TestUnitBondingCurveAsOwner is ConstantsFixture, DeploymentLinearBondin
 
         assertEq(deployerPostBalAcceptedToken, 5e18 );
         assertEq(changeInDeployerBalAcceptedToken, allocate_amount );
-
-        vm.stopPrank();
     }
 
 

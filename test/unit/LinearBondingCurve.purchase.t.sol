@@ -47,7 +47,6 @@ contract TestUnitLinearBondingCurve is ConstantsFixture, DeploymentLinearBonding
         arg_linearBondingCurve._slope = 1.5e18;
         arg_linearBondingCurve._initialPrice = 30e18;
 
-
         vm.stopPrank();
     }
 
