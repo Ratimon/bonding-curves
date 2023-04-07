@@ -18,6 +18,7 @@ import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 contract TestUnitLinearBondingCurve is ConstantsFixture, DeploymentLinearBondingCurve {
 
+    event CapUpdate(UD60x18 oldAmount, UD60x18 newAmount);
     event Purchase(address indexed to, UD60x18 amountIn, UD60x18 amountOut);
     
     IBondingCurve linearBondingCurve;
@@ -41,13 +42,11 @@ contract TestUnitLinearBondingCurve is ConstantsFixture, DeploymentLinearBonding
         arg_linearBondingCurve.acceptedToken = IERC20(address(acceptedToken));
         arg_linearBondingCurve.token = IERC20(address(saleToken));
         arg_linearBondingCurve._duration = 1 weeks;
-        arg_linearBondingCurve._cap = 1_000_000e18;
+        arg_linearBondingCurve._cap = 20_000e18;
         arg_linearBondingCurve._slope = 1.5e18;
         arg_linearBondingCurve._initialPrice = 30e18;
-        
-        linearBondingCurve = IBondingCurve(DeploymentLinearBondingCurve.deployAndSetup( arg_linearBondingCurve, dealERC20, saleToken, deployer ));
-        vm.label(address(linearBondingCurve), "linearBondingCurve");
-        
+
+
         vm.stopPrank();
     }
 
@@ -58,15 +57,57 @@ contract TestUnitLinearBondingCurve is ConstantsFixture, DeploymentLinearBonding
     modifier beforeEach() {
         vm.startPrank(deployer);
 
+        vm.expectEmit({checkTopic1: true, checkTopic2: true, checkTopic3: true, checkData: true}  );
+        emit CapUpdate(ud(0), ud(arg_linearBondingCurve._cap));
+
+        // linearBondingCurve = new LinearBondingCurve(
+        //     arg_linearBondingCurve.acceptedToken,
+        //     arg_linearBondingCurve.token, 
+        //     arg_linearBondingCurve._duration,
+        //     arg_linearBondingCurve._cap,
+        //     arg_linearBondingCurve._slope,
+        //     arg_linearBondingCurve._initialPrice
+        // );
+
+        // saleToken.approve(address(linearBondingCurve),type(uint256).max);
+        // dealERC20( address(saleToken), deployer,arg_linearBondingCurve._cap);
+        // linearBondingCurve.init();
+        linearBondingCurve = IBondingCurve(DeploymentLinearBondingCurve.deployAndSetup( arg_linearBondingCurve, dealERC20, saleToken, deployer ));
+
+        vm.label(address(linearBondingCurve), "linearBondingCurve");
+
         assertEq( unwrap(linearBondingCurve.cap()), IERC20(saleToken).balanceOf(address(linearBondingCurve)) );
 
         vm.stopPrank(  );
         _;
     }
 
-    function test_ForState_acceptedToken_purchase() public beforeEach() {
+     function test_RevertWhen_unexpectedETH_purchase() external beforeEach() {
         deal({token : address(acceptedToken), to: alice, give: 20e18 });
+        vm.startPrank(alice);
 
+        IERC20(address(acceptedToken)).approve(address(linearBondingCurve), type(uint256).max);
+        uint256 purchase_amount = 7e18;
+        vm.expectRevert( bytes("BondingCurve: unexpected ETH input"));
+        linearBondingCurve.purchase{value : 0.1 ether}( alice, purchase_amount);
+
+        vm.stopPrank();
+     }
+
+    function test_RevertWhen_exceedsCap_purchase() external beforeEach() {
+        deal({token : address(acceptedToken), to: alice, give: 200e18 });
+        vm.startPrank(alice);
+
+        IERC20(address(acceptedToken)).approve(address(linearBondingCurve), type(uint256).max);
+        uint256 purchase_amount = 200e18;
+        vm.expectRevert( bytes("BondingCurve: exceeds cap"));
+        linearBondingCurve.purchase( alice, purchase_amount);
+
+        vm.stopPrank();
+     }
+
+    function test_ForState_acceptedToken_purchase() external beforeEach() {
+        deal({token : address(acceptedToken), to: alice, give: 20e18 });
         vm.startPrank(alice);
 
         uint256 alicePreBalAcceptedToken = IERC20(address(acceptedToken)).balanceOf(alice);
@@ -92,10 +133,8 @@ contract TestUnitLinearBondingCurve is ConstantsFixture, DeploymentLinearBonding
         vm.stopPrank();
     }
 
-    function test_ForState_SaleToken_purchase() public beforeEach() {
-
+    function test_ForState_SaleToken_purchase() external beforeEach() {
         deal({token : address(acceptedToken), to: alice, give: 20e18 });
-
         vm.startPrank(alice);
 
         uint256 alicePreBalSaleToken = IERC20(address(saleToken)).balanceOf(alice);
@@ -133,9 +172,8 @@ contract TestUnitLinearBondingCurve is ConstantsFixture, DeploymentLinearBonding
     }
 
 
-    function test_allocate() public beforeEach() {
+    function test_allocate() external beforeEach() {
         deal({token : address(acceptedToken), to: alice, give: 20e18 });
-
         vm.startPrank(alice);
         vm.warp( {newTimestamp: staticTime + 1 days} );
 

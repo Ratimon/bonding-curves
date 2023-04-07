@@ -88,7 +88,6 @@ abstract contract BondingCurve is IBondingCurve, Initializable, Pausable, Ownabl
         returns (UD60x18 amountOut)
     {
         require(msg.value == 0, "BondingCurve: unexpected ETH input");
-
         amountOut = _purchase(to, amountIn);
 
         SafeERC20.safeTransferFrom(acceptedToken, msg.sender, address(this), amountIn);
@@ -158,14 +157,14 @@ abstract contract BondingCurve is IBondingCurve, Initializable, Pausable, Ownabl
         return ud(acceptedToken.balanceOf(address(this)));
     }
 
-    function _purchase(address to, uint256 tokenAmountIn) internal returns (UD60x18 balanceAmountOut) {
-        balanceAmountOut = calculatePurchaseAmountOut(ud(tokenAmountIn));
+    function _purchase(address to, uint256 tokenAmountIn) internal returns (UD60x18 saleTokenAmountOut) {
+        saleTokenAmountOut = calculatePurchaseAmountOut(ud(tokenAmountIn));
 
-        require(gte(availableToSell(), ud(tokenAmountIn)), "BondingCurve: exceeds cap");
-        _incrementTotalPurchased(balanceAmountOut);
+        require(gte(availableToSell(), saleTokenAmountOut), "BondingCurve: exceeds cap");
+        _incrementTotalPurchased(saleTokenAmountOut);
 
-        emit Purchase(to, ud(tokenAmountIn), balanceAmountOut);
-        return balanceAmountOut;
+        emit Purchase(to, ud(tokenAmountIn), saleTokenAmountOut);
+        return saleTokenAmountOut;
     }
 
     function _incrementTotalPurchased(UD60x18 amount) internal {
