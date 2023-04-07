@@ -24,11 +24,14 @@ contract InvariantBuyer is Test {
     function purchase(uint256 amount_) external {
         amount_ = bound(amount_, 1, 1e29); // 100 billion at WAD precision
         uint256 startingBuyBalance = _underlyingAcceptedToken.balanceOf(address(this));
+        uint256 startingSaleBalance = _underlyingSaleToken.balanceOf(address(this));
+        uint256 saleAmountOut = unwrap(_bondingCurve.calculatePurchaseAmountOut(ud(amount_)));
         deal({token: address(_underlyingAcceptedToken), to: address(this), give: amount_});
         _underlyingAcceptedToken.approve(address(_bondingCurve), amount_);
         _bondingCurve.purchase(address(this), amount_);
         // Ensure successful purchase
         assertEq(_underlyingAcceptedToken.balanceOf(address(this)), startingBuyBalance - amount_);
+        assertEq(_underlyingSaleToken.balanceOf(address(this)), startingSaleBalance + saleAmountOut);
     }
 }
 
