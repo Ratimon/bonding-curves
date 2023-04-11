@@ -17,3 +17,6 @@ out/
 
 # Dotenv file
 .env
+
+# Others
+.DS_Store
