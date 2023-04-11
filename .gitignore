@@ -10,7 +10,7 @@ out/
 /broadcast/**/dry-run/
 
 # Docs
-docs/
+# docs/
 
 # coverage report
 /coverage

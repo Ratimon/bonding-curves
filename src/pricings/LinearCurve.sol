@@ -49,7 +49,7 @@ contract LinearCurve {
      * @param tokenSupply the token supply
      * @return the total token price reported
      * @dev The Integral of price regarding to tokensupply f(supply)
-     * @dev : The integral: pool balance = y = f(x = supply) =  slope/2 * (currentTokenPurchased)^2 + initialPrice * (currentTokenPurchased)
+     * @dev : The integral: pool balance = y = f(x = currentTokenPurchased) =  slope/2 * (currentTokenPurchased)^2 + initialPrice * (currentTokenPurchased)
      *
      */
     function getPoolBalance(UD60x18 tokenSupply) public view returns (UD60x18) {

@@ -121,7 +121,7 @@ contract LinearBondingCurveInvariants is StdInvariant, Test, ConstantsFixture, D
         assertEq(unwrap(linearBondingCurve.availableToSell()), IERC20(saleToken).balanceOf(address(linearBondingCurve)));
     }
 
-    // Invariant 4: Poolbalance =   y = f(x = supply) =  slope/2 * (currentTokenPurchased)^2 + initialPrice * (currentTokenPurchased)
+    // Invariant 4: Poolbalance =  y = f(x = currentTokenPurchased) =  slope/2 * (currentTokenPurchased)^2 + initialPrice * (currentTokenPurchased)
     function invariant_Poolbalance_eq_saleTokenBalance() public {
         UD60x18 acceptedTokenSupply = ud(IERC20(acceptedToken).balanceOf(address(linearBondingCurve)));
         assertEq(

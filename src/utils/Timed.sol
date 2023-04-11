@@ -1,6 +1,8 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-or-later
 pragma solidity =0.8.19;
 
+/// @title an abstract contract for timed events
+/// @author Fei Protocol
 abstract contract Timed {
     /// @notice the start timestamp of the timed period
     uint256 public startTime;
